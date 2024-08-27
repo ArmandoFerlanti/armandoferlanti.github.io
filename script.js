@@ -6,6 +6,10 @@ function rimuovitesto() {
 }
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+document.getElementById("textarea").addEventListener("focus", function () {
+  document.body.style.zoom = "reset"; // Rimuove qualsiasi zoom applicato
+});
+
 // Funzione per creare e aggiungere un nuovo task all'HTML
 function createTaskElement(taskContent, isCompleted = false) {
   // Crea un nuovo elemento div per il task
