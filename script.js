@@ -11,6 +11,11 @@ function createTaskElement(taskContent, isCompleted = false) {
   // Crea un nuovo elemento div per il task
   let newTask = document.createElement("div");
   newTask.className = "task";
+  newTask.draggable = true; // Rende il task trascinabile
+  newTask.ondragstart = dragStart;
+  newTask.ondragover = dragOver;
+  newTask.ondrop = drop;
+  newTask.ondragend = dragEnd;
 
   // Crea un div per il testo del task
   let textDiv = document.createElement("div");
@@ -144,3 +149,58 @@ if ("serviceWorker" in navigator) {
   });
 }
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+let draggedTask = null;
+
+function dragStart(event) {
+  draggedTask = event.target;
+  draggedTask.classList.add("dragging"); // Aggiunge la classe per l'animazione di sollevamento
+  event.dataTransfer.effectAllowed = "move";
+}
+
+function dragOver(event) {
+  event.preventDefault();
+  const targetTask = event.target.closest(".task");
+
+  if (draggedTask !== targetTask) {
+    targetTask.style.backgroundColor = "#1665b5"; // Cambia il colore di sfondo del task target
+  }
+}
+
+function drop(event) {
+  event.preventDefault();
+  if (draggedTask !== event.target) {
+    const targetTask = event.target.closest(".task");
+    const header = document.getElementById("header");
+
+    // Inserisce il task trascinato sopra o sotto il task target
+    if (
+      event.clientY <
+      targetTask.getBoundingClientRect().top + targetTask.offsetHeight / 2
+    ) {
+      header.insertBefore(draggedTask, targetTask); // Inserisce sopra
+    } else {
+      header.insertBefore(draggedTask, targetTask.nextSibling); // Inserisce sotto
+    }
+
+    draggedTask.classList.add("dropping"); // Aggiunge la classe per l'animazione di rilascio
+
+    // Rimuove la classe dopo che l'animazione è completata
+    draggedTask.addEventListener("animationend", function () {
+      draggedTask.classList.remove("dropping");
+    });
+
+    // Ripristina il colore di sfondo dei task dopo il rilascio
+    document.querySelectorAll(".task").forEach((task) => {
+      task.style.backgroundColor = ""; // Ripristina il colore originale
+    });
+
+    // Aggiorna il localStorage per riflettere il nuovo ordine
+    updateLocalStorage();
+  }
+}
+
+function dragEnd(event) {
+  event.target.classList.remove("dragging"); // Rimuove la classe di animazione
+  draggedTask = null;
+}
