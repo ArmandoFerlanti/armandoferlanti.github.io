@@ -5,7 +5,9 @@ body {
 h1 {
   text-align: center;
   color: black;
-  font-family: cursive;
+  font-family: "Nerko One", cursive;
+  font-weight: 400;
+  font-style: normal;
 }
 
 #header {
@@ -55,7 +57,9 @@ h1 {
   border-color: black;
   border-style: solid;
   font-size: 16px;
-  font-family: cursive;
+  font-family: "Nerko One", cursive;
+  font-weight: 400;
+  font-style: normal;
 }
 
 @keyframes fadeInSlideUp {
@@ -84,7 +88,9 @@ h1 {
   align-items: flex-start;
   opacity: 0; /* Inizia invisibile */
   animation: fadeInSlideUp 0.5s ease-out forwards; /* Applica l'animazione */
-  font-family: cursive;
+  font-family: "Nerko One", cursive;
+  font-weight: 400;
+  font-style: normal;
 }
 
 .task-text {
