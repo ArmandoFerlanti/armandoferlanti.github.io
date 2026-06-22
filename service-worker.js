@@ -1,15 +1,15 @@
-const CACHE_NAME = "todo-cache-v2";
+const CACHE_NAME = "todo-cache-v3";
 const urlsToCache = [
-  "/",
-  "/index.html",
-  "/style.css",
-  "/script.js",
-  "/manifest.json",
-  "/icon/android-chrome-192x192",
-  "/icon/android-chrome-512x512",
-  "/icon/apple-touch-icon.png",
-  "/icon/favicon-16x16.png",
-  "/icon/favicon-32x32.png",
+  "./",
+  "./index.html",
+  "./style.css",
+  "./script.js",
+  "./manifest.json",
+  "./icon/android-chrome-192x192.png",
+  "./icon/android-chrome-512x512.png",
+  "./icon/apple-touch-icon.png",
+  "./icon/favicon-16x16.png",
+  "./icon/favicon-32x32.png",
 ];
 
 self.addEventListener("install", (event) => {

@@ -11,7 +11,7 @@ document.getElementById("textarea").addEventListener("focus", function () {
 });
 
 // Funzione per creare e aggiungere un nuovo task all'HTML
-function createTaskElement(taskContent, isCompleted = false) {
+function createTaskElement(taskContent) {
   // Crea un nuovo elemento div per il task
   let newTask = document.createElement("div");
   newTask.className = "task";
@@ -26,30 +26,10 @@ function createTaskElement(taskContent, isCompleted = false) {
   textDiv.className = "task-text";
   textDiv.textContent = taskContent;
 
-  // Se il task è completato, aggiungi la decorazione di testo
-  if (isCompleted) {
-    textDiv.style.textDecoration = "line-through";
-  }
-
   // Crea un div per i bottoni
   let buttonsDiv = document.createElement("div");
   buttonsDiv.className = "task-buttons";
 
-  // Crea un pulsante "Completa" con icona
-  let completeButton = document.createElement("button");
-  completeButton.innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-      </svg>
-    `;
-  completeButton.className = "complete-button";
-
-  // Disabilita il pulsante "Completa" se il task è già completato
-  if (isCompleted) {
-    completeButton.disabled = true;
-  }
-
-  
   // Crea un pulsante "modifica" con icona
   let editButton = document.createElement("button");
   editButton.className = "edit-button";
@@ -70,7 +50,6 @@ function createTaskElement(taskContent, isCompleted = false) {
   removeButton.className = "remove-button";
 
   // Aggiungi i bottoni al div dei bottoni
-  buttonsDiv.appendChild(completeButton);
   buttonsDiv.appendChild(removeButton);
 
   // Aggiungi il div del testo e il div dei bottoni al div del task
@@ -94,22 +73,14 @@ function createTaskElement(taskContent, isCompleted = false) {
 
   // aggiungi l' evento di click per modificare il task
   editButton.onclick = function () {
-  editTask(newTask, textDiv, editButton, completeButton, removeButton);
+  editTask(newTask, textDiv, editButton, removeButton);
 };
-  
-  // Aggiungi l'evento di click per completare il task
-  completeButton.addEventListener("click", function () {
-    textDiv.style.textDecoration = "line-through";
-    completeButton.disabled = true; // Disabilita il pulsante "Completa" dopo l'uso
-    updateLocalStorage(); // Aggiorna il localStorage dopo aver completato il task
-  });
-}
+  }
 
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // funzione per modificare il task
-function editTask(taskElement, textDiv, editButton, completeButton, removeButton) {
+function editTask(taskElement, textDiv, editButton, removeButton) {
   const originalContent = textDiv.textContent;
-  const wasCompleted = completeButton.disabled;
   // Rende il testo editabile direttamente
   textDiv.contentEditable = true;
   // Cambia icona in "Salva"
@@ -118,27 +89,26 @@ function editTask(taskElement, textDiv, editButton, completeButton, removeButton
       <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
     </svg>
   `;
-  // Disabilita altri pulsanti e drag
-  completeButton.disabled = true;
+  // Disabilita rimozione e drag
   removeButton.disabled = true;
   taskElement.draggable = false;
   textDiv.focus();
   // Salva al click
   editButton.onclick = function () {
-    saveEditTask(taskElement, textDiv, editButton, completeButton, removeButton, wasCompleted);
+    saveEditTask(taskElement, textDiv, editButton, removeButton);
   };
   // Enter salva, Escape annulla
   textDiv.addEventListener("keydown", function (e) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      saveEditTask(taskElement, textDiv, editButton, completeButton, removeButton, wasCompleted);
+      saveEditTask(taskElement, textDiv, editButton, removeButton);
     } else if (e.key === "Escape") {
-      cancelEdit(taskElement, textDiv, editButton, completeButton, removeButton, originalContent, wasCompleted);
+      cancelEdit(taskElement, textDiv, editButton, removeButton, originalContent);
     }
   });
 }
 
-function saveEditTask(taskElement, textDiv, editButton, completeButton, removeButton, wasCompleted) {
+function saveEditTask(taskElement, textDiv, editButton, removeButton) {
   const newContent = textDiv.textContent.trim();
   if (newContent) {
     textDiv.textContent = newContent;
@@ -151,10 +121,9 @@ function saveEditTask(taskElement, textDiv, editButton, completeButton, removeBu
     </svg>
   `;
   editButton.onclick = function () {
-    editTask(taskElement, textDiv, editButton, completeButton, removeButton);
+    editTask(taskElement, textDiv, editButton, removeButton);
   };
   // Ripristina pulsanti e drag
-  completeButton.disabled = wasCompleted;
   removeButton.disabled = false;
   taskElement.draggable = true;
   updateLocalStorage();
@@ -170,7 +139,7 @@ function aggiungitask() {
   }
 }
 
-function cancelEdit(taskElement, textDiv, editButton, completeButton, removeButton, originalContent, wasCompleted) {
+function cancelEdit(taskElement, textDiv, editButton, removeButton, originalContent) {
   textDiv.textContent = originalContent;
   textDiv.contentEditable = false;
   editButton.innerHTML = `
@@ -179,9 +148,8 @@ function cancelEdit(taskElement, textDiv, editButton, completeButton, removeButt
     </svg>
   `;
   editButton.onclick = function () {
-    editTask(taskElement, textDiv, editButton, completeButton, removeButton);
+    editTask(taskElement, textDiv, editButton, removeButton);
   };
-  completeButton.disabled = wasCompleted;
   removeButton.disabled = false;
   taskElement.draggable = true;
 }
@@ -193,8 +161,7 @@ function updateLocalStorage() {
   const tasks = [];
   document.querySelectorAll(".task").forEach((task) => {
     tasks.push({
-      content: task.querySelector(".task-text").textContent,
-      completed: task.querySelector(".complete-button").disabled,
+      content: task.querySelector(".task-text").textContent
     });
   });
   localStorage.setItem("tasks", JSON.stringify(tasks));
@@ -205,7 +172,7 @@ function updateLocalStorage() {
 // Funzione per caricare i task dal localStorage
 function loadTasksFromLocalStorage() {
   const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-  tasks.forEach((task) => createTaskElement(task.content, task.completed));
+  tasks.forEach((task) => createTaskElement(task.content));
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -224,7 +191,7 @@ loadTasksFromLocalStorage();
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
-    navigator.serviceWorker.register("/service-worker.js").then(
+    navigator.serviceWorker.register("service-worker.js").then(
       function (registration) {
         console.log(
           "ServiceWorker registration successful with scope: ",
@@ -239,57 +206,88 @@ if ("serviceWorker" in navigator) {
 }
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+function flipAnimate(container, callback) {
+  const tasks = [...container.querySelectorAll(".task:not(.dragging)")];
+  const oldRects = tasks.map((t) => t.getBoundingClientRect());
+
+  callback();
+
+  requestAnimationFrame(() => {
+    tasks.forEach((task, i) => {
+      const newRect = task.getBoundingClientRect();
+      const dx = oldRects[i].left - newRect.left;
+      const dy = oldRects[i].top - newRect.top;
+      if (dx !== 0 || dy !== 0) {
+        task.style.transition = "none";
+        task.style.transform = `translate(${dx}px, ${dy}px)`;
+        task.offsetHeight;
+        task.style.transition = "transform 0.35s ease";
+        task.style.transform = "";
+        task.addEventListener("transitionend", function cleanup() {
+          task.style.transition = "";
+          task.removeEventListener("transitionend", cleanup);
+        });
+      }
+    });
+  });
+}
+
 let draggedTask = null;
 
 function dragStart(event) {
   draggedTask = event.target;
-  draggedTask.classList.add("dragging"); // Aggiunge la classe per l'animazione di sollevamento
+  draggedTask.classList.add("dragging");
   event.dataTransfer.effectAllowed = "move";
+  event.dataTransfer.setData("text/plain", "");
 }
 
 function dragOver(event) {
   event.preventDefault();
   const targetTask = event.target.closest(".task");
+  if (!targetTask || targetTask === draggedTask) return;
 
-  if (draggedTask !== targetTask) {
-    targetTask.style.backgroundColor = "#1665b5"; // Cambia il colore di sfondo del task target
+  document.querySelectorAll(".task").forEach((t) => {
+    t.classList.remove("drag-gap-bottom", "drag-gap-top");
+  });
+
+  const rect = targetTask.getBoundingClientRect();
+  const midY = rect.top + rect.height / 2;
+
+  if (event.clientY < midY) {
+    targetTask.classList.add("drag-gap-top");
+  } else {
+    targetTask.classList.add("drag-gap-bottom");
   }
 }
 
 function drop(event) {
   event.preventDefault();
-  if (draggedTask !== event.target) {
-    const targetTask = event.target.closest(".task");
-    const header = document.getElementById("header");
+  const targetTask = event.target.closest(".task");
+  if (!targetTask || draggedTask === targetTask) return;
 
-    // Inserisce il task trascinato sopra o sotto il task target
-    if (
-      event.clientY <
-      targetTask.getBoundingClientRect().top + targetTask.offsetHeight / 2
-    ) {
-      header.insertBefore(draggedTask, targetTask); // Inserisce sopra
+  const header = document.getElementById("header");
+  const rect = targetTask.getBoundingClientRect();
+  const midY = rect.top + rect.height / 2;
+
+  flipAnimate(header, () => {
+    if (event.clientY < midY) {
+      header.insertBefore(draggedTask, targetTask);
     } else {
-      header.insertBefore(draggedTask, targetTask.nextSibling); // Inserisce sotto
+      header.insertBefore(draggedTask, targetTask.nextSibling);
     }
+  });
 
-    draggedTask.classList.add("dropping"); // Aggiunge la classe per l'animazione di rilascio
+  document.querySelectorAll(".task").forEach((t) => {
+    t.classList.remove("drag-gap-bottom", "drag-gap-top");
+  });
 
-    // Rimuove la classe dopo che l'animazione è completata
-    draggedTask.addEventListener("animationend", function () {
-      draggedTask.classList.remove("dropping");
-    });
-
-    // Ripristina il colore di sfondo dei task dopo il rilascio
-    document.querySelectorAll(".task").forEach((task) => {
-      task.style.backgroundColor = ""; // Ripristina il colore originale
-    });
-
-    // Aggiorna il localStorage per riflettere il nuovo ordine
-    updateLocalStorage();
-  }
+  updateLocalStorage();
 }
 
 function dragEnd(event) {
-  event.target.classList.remove("dragging"); // Rimuove la classe di animazione
+  event.target.classList.remove("dragging");
+  document.querySelectorAll(".task").forEach((t) => {
+    t.classList.remove("drag-gap-bottom", "drag-gap-top");
+  });
   draggedTask = null;
 }

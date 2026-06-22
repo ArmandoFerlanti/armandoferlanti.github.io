@@ -1,5 +1,6 @@
 body {
   background-color: #fffafa;
+  padding-bottom: 60px;
 }
 
 h1 {
@@ -79,7 +80,7 @@ h1 {
   width: 293px;
   height: auto;
   max-height: 150px;
-  border-radius: 7px;
+  border-radius: 23px;
   padding: 15px;
   box-sizing: border-box;
   margin: 10px;
@@ -111,7 +112,6 @@ h1 {
   flex-shrink: 0;
 }
 
-.complete-button,
 .remove-button,
 .edit-button {
   padding: 5px;
@@ -123,17 +123,12 @@ h1 {
   align-items: center;
 }
 
-.complete-button svg,
 .remove-button svg,
 .edit-button svg {
   width: 15px;
   height: 15px;
   stroke: #ffffff;
   border-radius: 10px;
-}
-
-.complete-button {
-  background-color: #4caf50;
 }
 
 .remove-button {
@@ -148,20 +143,38 @@ h1 {
   outline: none;
 }
 
-
 @keyframes fadeOutSlideDown {
   0% {
     opacity: 1;
-    transform: translateY(0); /* Posizione iniziale */
+    transform: translateX(0);
   }
   100% {
     opacity: 0;
-    transform: translateX(20px); /* Si sposta verso il basso */
+    transform: translateX(100vw);
   }
 }
 
 .task.remove {
   animation: fadeOutSlideDown 0.5s ease-out forwards; /* Applica l'animazione di uscita */
+}
+
+footer .trademark {
+  font-size: 24px;
+  vertical-align: middle;
+}
+
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: black;
+  color: white;
+  text-align: center;
+  padding: 12px 0;
+  font-family: "Nerko One", cursive;
+  font-size: 18px;
+  letter-spacing: 1px;
 }
 
 #firma {
@@ -232,13 +245,20 @@ h1 {
 /* Effetto di sollevamento durante il trascinamento */
 .dragging {
   opacity: 0.7;
-  transform: scale(1.05); /* Ingrandisce leggermente il ticket */
-  transition: transform 0.2s ease, opacity 0.2s ease; /* Transizione dolce */
+  transform: scale(1.08) rotate(1deg);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+  transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+  z-index: 100;
+  position: relative;
 }
 
-/* Effetto di inserimento nel nuovo slot */
-.dropping {
-  transition: transform 0.3s ease, opacity 0.3s ease; /* Transizione dolce */
-  transform: translateY(-10px); /* Sposta il ticket verso l'alto */
-  opacity: 1;
+/* Gap visivo per indicare dove verrà inserito il task */
+.task.drag-gap-top {
+  margin-top: 35px;
+  transition: margin-top 0.25s ease;
+}
+
+.task.drag-gap-bottom {
+  margin-bottom: 35px;
+  transition: margin-bottom 0.25s ease;
 }
