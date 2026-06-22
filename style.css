@@ -112,7 +112,8 @@ h1 {
 }
 
 .complete-button,
-.remove-button {
+.remove-button,
+.edit-button {
   padding: 5px;
   border-radius: 20px;
   border: none;
@@ -123,7 +124,8 @@ h1 {
 }
 
 .complete-button svg,
-.remove-button svg {
+.remove-button svg,
+.edit-button svg {
   width: 15px;
   height: 15px;
   stroke: #ffffff;
@@ -137,6 +139,15 @@ h1 {
 .remove-button {
   background-color: #f44336;
 }
+
+.edit-button {
+  background-color: #ff9800;
+}
+
+.task-text[contenteditable="true"] {
+  outline: none;
+}
+
 
 @keyframes fadeOutSlideDown {
   0% {

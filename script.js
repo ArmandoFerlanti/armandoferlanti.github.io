@@ -49,6 +49,17 @@ function createTaskElement(taskContent, isCompleted = false) {
     completeButton.disabled = true;
   }
 
+  
+  // Crea un pulsante "modifica" con icona
+  let editButton = document.createElement("button");
+  editButton.className = "edit-button";
+  editButton.innerHTML = `
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+</svg>
+`;
+  buttonsDiv.appendChild(editButton);
+  
   // Crea un pulsante "Rimuovi" con icona
   let removeButton = document.createElement("button");
   removeButton.innerHTML = `
@@ -81,6 +92,11 @@ function createTaskElement(taskContent, isCompleted = false) {
     });
   });
 
+  // aggiungi l' evento di click per modificare il task
+  editButton.onclick = function () {
+  editTask(newTask, textDiv, editButton, completeButton, removeButton);
+};
+  
   // Aggiungi l'evento di click per completare il task
   completeButton.addEventListener("click", function () {
     textDiv.style.textDecoration = "line-through";
@@ -90,6 +106,59 @@ function createTaskElement(taskContent, isCompleted = false) {
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// funzione per modificare il task
+function editTask(taskElement, textDiv, editButton, completeButton, removeButton) {
+  const originalContent = textDiv.textContent;
+  const wasCompleted = completeButton.disabled;
+  // Rende il testo editabile direttamente
+  textDiv.contentEditable = true;
+  // Cambia icona in "Salva"
+  editButton.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+    </svg>
+  `;
+  // Disabilita altri pulsanti e drag
+  completeButton.disabled = true;
+  removeButton.disabled = true;
+  taskElement.draggable = false;
+  textDiv.focus();
+  // Salva al click
+  editButton.onclick = function () {
+    saveEditTask(taskElement, textDiv, editButton, completeButton, removeButton, wasCompleted);
+  };
+  // Enter salva, Escape annulla
+  textDiv.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      saveEditTask(taskElement, textDiv, editButton, completeButton, removeButton, wasCompleted);
+    } else if (e.key === "Escape") {
+      cancelEdit(taskElement, textDiv, editButton, completeButton, removeButton, originalContent, wasCompleted);
+    }
+  });
+}
+
+function saveEditTask(taskElement, textDiv, editButton, completeButton, removeButton, wasCompleted) {
+  const newContent = textDiv.textContent.trim();
+  if (newContent) {
+    textDiv.textContent = newContent;
+  }
+  textDiv.contentEditable = false;
+  // Ripristina icona matita
+  editButton.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+      <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+    </svg>
+  `;
+  editButton.onclick = function () {
+    editTask(taskElement, textDiv, editButton, completeButton, removeButton);
+  };
+  // Ripristina pulsanti e drag
+  completeButton.disabled = wasCompleted;
+  removeButton.disabled = false;
+  taskElement.draggable = true;
+  updateLocalStorage();
+}
 
 // Funzione per aggiungere un nuovo task e salvarlo nel localStorage
 function aggiungitask() {
@@ -99,6 +168,22 @@ function aggiungitask() {
     updateLocalStorage(); // Salva il nuovo task nel localStorage
     document.getElementById("textarea").value = ""; // Svuota la textarea
   }
+}
+
+function cancelEdit(taskElement, textDiv, editButton, completeButton, removeButton, originalContent, wasCompleted) {
+  textDiv.textContent = originalContent;
+  textDiv.contentEditable = false;
+  editButton.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+      <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+    </svg>
+  `;
+  editButton.onclick = function () {
+    editTask(taskElement, textDiv, editButton, completeButton, removeButton);
+  };
+  completeButton.disabled = wasCompleted;
+  removeButton.disabled = false;
+  taskElement.draggable = true;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
